@@ -33,8 +33,9 @@ void destroyLabyrinth(t_node** labyrinth, vector2i labSize) {
 }
 
 //fonction qui renvoie la position du prochain trésor qu'on doit atteindre.
+//direction = +1 -> sens croissant, direction=-1 -> sens decroissant
 //si problème ou prochain trésor inexistant, renvoie le vecteur {-1, -1}.
-vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize) {
+vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize, int direction) {
     int minimumTreasure = 9999; //+ petit trésor = prochain à visiter.
     vector2i nextTreasurePos = newVect2i(-1, -1);
 
