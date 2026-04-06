@@ -24,21 +24,32 @@ int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir) {
     t_node currentNode = labyrinth[posY][posX];
     switch (dir) {
         case NORTH:
-            if ( (labyrinth[posY-1][posX].SOUTH == 1) && (currentNode.NORTH == 1) ) return 1;
+            if ( (labyrinth[posY-1][posX].SOUTH == !IS_WALL) && (currentNode.NORTH == !IS_WALL) ) return 1;
         break;
 
         case SOUTH:
-            if ( (labyrinth[posY+1][posX].NORTH == 1) && (currentNode.SOUTH == 1) ) return 1;
+            if ( (labyrinth[posY+1][posX].NORTH == !IS_WALL) && (currentNode.SOUTH == !IS_WALL) ) return 1;
         break;
 
         case WEST:
-            if ( (labyrinth[posY][posX-1].EAST == 1) && (currentNode.WEST == 1) ) return 1;
+            if ( (labyrinth[posY][posX-1].EAST == !IS_WALL) && (currentNode.WEST == !IS_WALL) ) return 1;
         break;
 
         case EAST:
-            if ( (labyrinth[posY][posX+1].WEST == 1) && (currentNode.EAST == 1) ) return 1;
+            if ( (labyrinth[posY][posX+1].WEST == !IS_WALL) && (currentNode.EAST == !IS_WALL) ) return 1;
         break;
 
         }
     return 0;
+}
+
+
+void printNode(t_node node) {
+    printf("isWall Nord/Sud/Est/Ouest: %d, %d, %d, %d",
+    node.NORTH==IS_WALL,
+    node.SOUTH==IS_WALL,
+    node.EAST==IS_WALL,
+    node.WEST==IS_WALL
+    );
+    printf("\nTREASURE VAL: %d", node.treasureVal);
 }

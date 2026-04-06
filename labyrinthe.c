@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+//l'api du prof
+#include "../LAB26_subject/labyrinthe26/labyrinthAPI.h"
+
 #include "vector2.h"
 #include "labyrinthe.h"
 #include "node.h"
@@ -11,7 +15,7 @@ t_node** createLabyrinth(vector2i labSize) {
     int sizeX, sizeY;
     sizeX = labSize.x; sizeY = labSize.y;
 
-    int** labyrinth = malloc(sizeof(t_node*)*sizeY);
+    t_node** labyrinth = malloc(sizeof(t_node*)*sizeY);
     
     for(int i=0; i<sizeY; i++) {
         labyrinth[i] = malloc(sizeof(t_node)*sizeX);
@@ -54,8 +58,9 @@ vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize) {
 
 
 //renvoie la longueur du plus petit chemin entre les positions posDepart et posArrivee.
-//Si il y a une erreur (chemins non connectés) renvoie -1.
+
 int shortestPathLength(t_node** lab, vector2i labSize, vector2i posDepart, vector2i posArrivee) {
+
 
     e_direction directions[4] = {NORTH, SOUTH, EAST, WEST};
 
@@ -118,3 +123,52 @@ int shortestPathLength(t_node** lab, vector2i labSize, vector2i posDepart, vecto
     return -1;
     
 }
+
+
+//Renvoie l'extraTile, qui peut être replacée selon les règles de labyrinthe.
+//modifie la valeur de isOppStarting (cf getLabyrinth) et remplit extraTile
+void fillLabyrinth(t_node** lab, vector2i labSize, int* isOpponentStarting, t_node* extraTile) {
+
+
+    int sizeX = labSize.x, sizeY = labSize.y;
+
+    char* labyData = malloc( sizeof(char) * ( (sizeX*sizeY+5)*11 + 1) ); //+1 pour le eos
+    *isOpponentStarting = getLabyrinth(labyData); //remplit le string labydata des données du lab.
+
+
+    char* ptr = labyData;
+    for(int i=0; i<sizeY; i++) {
+        for(int j=0; j<sizeX; j++) {
+            //cf docu 3.1 pour le scan des data.
+            int n;
+
+            sscanf(ptr, "%d %d %d %d %d%n", //n=nb de char que j'ai mangé.
+            &lab[i][j].NORTH,
+            &lab[i][j].EAST,
+            &lab[i][j].SOUTH,
+            &lab[i][j].WEST,
+            &lab[i][j].treasureVal,
+
+            &n
+            );
+
+            ptr+=n; //on avance des n char que j'ai mangé.
+
+        }
+    }
+
+    sscanf(ptr, "%d %d %d %d %d",
+            &extraTile->NORTH,
+            &extraTile->EAST,
+            &extraTile->SOUTH,
+            &extraTile->WEST,
+            &extraTile->treasureVal
+            );
+
+
+    free(labyData);
+}
+
+
+
+

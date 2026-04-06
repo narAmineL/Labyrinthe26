@@ -1,12 +1,13 @@
 #ifndef __NODE_H__
 #define __NODE_H__
 
+#define IS_WALL 1
 
-typedef enum {NORTH, SOUTH, WEST, EAST} e_direction;
+#include "vector2.h"
 
 //structure d'une node: chaque position est un bool (=0/1) qui indique si
-//la position est passante ou non.
-//treasureID vaut -1 si il n'y a pas de trésor, et vaut l'ID du trésor si il y en a un.
+//la position est passante ou non. 1=passante 0=coupante
+//treasureID vaut 0 si il n'y a pas de trésor, et vaut l'ID du trésor si il y en a un.
 typedef struct {
     int NORTH;
     int SOUTH;
@@ -17,7 +18,7 @@ typedef struct {
 } t_node;
 
 
-
+void printNode(t_node node);
 void rotateNode90CCW(t_node* node);
 int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir);
 

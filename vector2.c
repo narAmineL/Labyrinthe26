@@ -6,6 +6,7 @@ vector2i newVect2i(int x, int y) {
     vector2i result;
     result.x = x;
     result.y = y;
+    return result;
 }
 
 //renvoie 1 si vecteur vide, 0 sinon.

@@ -1,6 +1,9 @@
 #ifndef __VECTOR2_H__
 #define __VECTOR2_H__
 
+
+typedef enum {NORTH, SOUTH, WEST, EAST} e_direction;
+
 typedef struct {
     int x;
     int y;
