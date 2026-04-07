@@ -16,4 +16,6 @@ typedef struct {
 
 } player;
 
+int shortestPathLength(t_node** lab, vector2i labSize, vector2i posDepart, vector2i posArrivee);
+
 #endif

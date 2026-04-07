@@ -18,6 +18,17 @@ typedef struct {
 } t_node;
 
 
+//structure qui définit une insertion; la insertDir donne NOR=en haut, SUD=en bas...
+//insertIndex=l'index d'insertion dans ctte direction
+//nbRotations = nombres de rota en sens horaires qu'on fait a extratile avant de l'insérer
+typedef struct {
+    e_direction insertDir;
+    int insertIndex;
+    int nbRotations;
+
+} t_insertion;
+
+
 void printNode(t_node node);
 void rotateNode90CW(t_node* node);
 int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir);

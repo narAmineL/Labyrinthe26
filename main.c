@@ -35,12 +35,13 @@ int main(void) {
     waitForLabyrinth("TRAINING RANDOM start=1", labName, (int*)&labSize.x, (int*)&labSize.y); //start=1 -> opp commence
 
     t_node** lab = createLabyrinth(labSize); //création du labyrinthe.
-    fillLabyrinth(lab, labSize, &isOpponentTurn, &extraTile); //le remplir selon getLabData de l'api et renvoyer l'extra tile.
+    fillLabyrinth(lab, labSize, &isOpponentTurn, &extraTile); //le remplir selon getLabData de l'api et renvoyer l'extra tile. dit aussi qui commence
     
-
+    //variables booléennes qui disent si un des deux a gagné.
+    int playerWon = 0, opponentWon = 0;
 
     //|--- BOUCLE PRINCIPALE ---|
-    //while(1) {
+    while(!playerWon || !opponentWon) {
         printLabyrinth();
 
         char opponentMove[64];
@@ -52,6 +53,9 @@ int main(void) {
             returnCode = getMove(opponentMove, msg);
             computeOpponentMove(lab, labSize, &extraTile, opponentMove, msg, &opponent);
 
+            if (returnCode==WINNING_MOVE) opponentWon=1;
+            else if (returnCode==LOSING_MOVE) printf("Un coup illégal a été joué par l'adversaire !");
+
             isOpponentTurn=0; //finir tour adversaire.
         } 
         //|--- TOUR DU JOUEUR ---|
@@ -61,7 +65,7 @@ int main(void) {
         }
 
 
-    //}
+    }
 
 
 
