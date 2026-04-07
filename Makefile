@@ -12,7 +12,7 @@ SRC_DIR = .
 API_DIR = ../LAB26_subject/labyrinthe26
 
 # Fichiers sources
-SRCS = main.c node.c vector2.c labyrinthe.c ../LAB26_subject/labyrinthe26/labyrinthAPI.c ../LAB26_subject/labyrinthe26/clientAPI.c
+SRCS = main.c node.c vector2.c labyrinthe.c player.c ../LAB26_subject/labyrinthe26/labyrinthAPI.c ../LAB26_subject/labyrinthe26/clientAPI.c
 
 # Fichiers objets
 OBJS = $(SRCS:.c=.o)

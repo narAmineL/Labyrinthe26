@@ -9,6 +9,7 @@
 #include "vector2.h"
 #include "labyrinthe.h"
 #include "node.h"
+#include "player.h"
 
 //fonction qui rend un pointeur qui donne vers une matrice2D (sizeX*sizeY) allouée de nodes (cf node.h)
 t_node** createLabyrinth(vector2i labSize) {
@@ -172,4 +173,102 @@ void fillLabyrinth(t_node** lab, vector2i labSize, int* isOpponentStarting, t_no
 
 
 
+//fct qui insère la tile extraTile dans le labyrinth du côté dirToInsert (NORTH=en haut, WEST=à gauche...)
+//pas besoin de modifier la valeur de extraTile, elle se trouve dans le msg
+void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, e_direction dirToInsert, int insertIndex) {
+    int sizeX = labSize.x, sizeY = labSize.y;
+
+
+    switch(dirToInsert) {
+
+        //|--- INSERER LA CASE EN HAUT ---|
+        case NORTH:
+            for(int i=sizeY-1; i>0; i--) {
+                lab[i][insertIndex] = lab[i-1][insertIndex];
+            }
+        
+            lab[0][insertIndex] = *extraTile;
+        break;
+
+        //|--- INSERER LA CASE EN BAS ---|
+        case SOUTH:
+            for(int i=0; i<sizeY-1; i++) {
+                lab[i][insertIndex] = lab[i+1][insertIndex];
+            }
+
+            lab[sizeY-1][insertIndex] = *extraTile;
+        break;
+
+        //|--- INSERER LA CASE A GAUCHE ---|
+        case WEST:
+            for(int j=sizeX-1; j>0; j--) {
+                lab[insertIndex][j] = lab[insertIndex][j-1];
+            }
+        
+            lab[insertIndex][0] = *extraTile;
+        break;
+
+        //|--- INSERER LA CASE A DROITE ---|
+        case EAST:
+            for(int j=0; j<sizeX-1; j++) {
+                lab[insertIndex][j] = lab[insertIndex][j+1];
+            }
+        
+
+            lab[insertIndex][sizeX-1] = *extraTile;
+        break;
+    }
+
+}
+
+
+
+void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char* moveString, char* msg, player* opponent) {
+
+    int insertDirInt; /*direction d'insertion (cf docu pdf)
+        •0 pour une insertion d’une ligne `a gauche
+        •1 pour une insertion d’une ligne `a droite
+        •2 pour une insertion d’une colonne en haut
+        •3 pour une insertion d’une colonne en bas
+    */
+    int insertIndex; //Indice de la ligne ou de la colonne où on insert la tuile
+    int nbRotations; //Nombre de rotation de la tuile avant de l’insérer (de 0 à 3 quart de tour dans le sens horaire)
+
+    vector2i posToReach; //position à atteindre après l'insertion de la tuile.
+
+    sscanf(moveString, "%d %d %d %d %d", //n=nb de char que j'ai mangé.
+            &insertDirInt,
+            &insertIndex,
+            &nbRotations,
+            &posToReach.x,
+            &posToReach.y
+            );
+
+    //scanner le message et remplir extraTile et le prochain trésor de l'opponent.
+    sscanf(msg, "%d %d %d %d %d %d", //n=nb de char que j'ai mangé.
+            &extraTile->NORTH,
+            &extraTile->EAST,
+            &extraTile->SOUTH,
+            &extraTile->WEST,
+            &extraTile->treasureVal,
+
+            &opponent->nextTreasureVal
+            );
+
+    e_direction dirToInsert;
+
+    switch (insertDirInt) { //DETERMINER LA DIRECTION D'ENTREE
+        case 0: dirToInsert = WEST; break;
+        case 1: dirToInsert = EAST; break; 
+        case 2: dirToInsert = NORTH; break;
+        case 3: dirToInsert = SOUTH; break;
+    }
+
+    //effectuer les rotations de la tuile.
+    for(int i=0; i<nbRotations; i++) rotateNode90CW(extraTile);
+
+    insertTile(lab, labSize, extraTile, dirToInsert, insertIndex); //INSERER LA TUILE
+
+    opponent->pos = posToReach; //déplacer l'adversaire où il doit aller.
+}
 

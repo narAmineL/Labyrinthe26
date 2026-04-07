@@ -6,13 +6,14 @@
 #include "node.h"
 
 
-//fct qui tourne une node de 90 degrés dans le sens trigonométrique. (CounterClockWise)
-void rotateNode90CCW(t_node* node) {
+//fct qui tourne une node de 90 degrés dans le sens horaire. (ClockWise)
+void rotateNode90CW(t_node* node) {
     int tempNorth = node->NORTH;
-    node->NORTH = node->EAST;
-    node->EAST = node->SOUTH;
-    node->SOUTH = node->WEST;
-    node->WEST = tempNorth;
+    node->NORTH = node->WEST;
+    node->WEST = node->SOUTH;
+    node->SOUTH = node->EAST;
+    node->EAST = tempNorth;
+    
 }
 
 //fct qui renvoie 1 si la node lab[posY][posX] est connectée à la node qui se trouve à la direction dir
@@ -45,11 +46,11 @@ int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir) {
 
 
 void printNode(t_node node) {
-    printf("isWall Nord/Sud/Est/Ouest: %d, %d, %d, %d",
+    printf("isWall Nord/Sud/Est/Ouest: %d, %d, %d, %d, TV=%d\n",
     node.NORTH==IS_WALL,
     node.SOUTH==IS_WALL,
     node.EAST==IS_WALL,
-    node.WEST==IS_WALL
+    node.WEST==IS_WALL,
+    node.treasureVal
     );
-    printf("\nTREASURE VAL: %d", node.treasureVal);
 }

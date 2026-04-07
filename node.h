@@ -19,7 +19,7 @@ typedef struct {
 
 
 void printNode(t_node node);
-void rotateNode90CCW(t_node* node);
+void rotateNode90CW(t_node* node);
 int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir);
 
 #endif
