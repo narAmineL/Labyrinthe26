@@ -45,23 +45,27 @@ int shortestPathLength(t_node** lab, vector2i labSize, vector2i posDepart, vecto
             return currentDist;
         }
 
-        for(int dir=0; dir<4; dir++) { //dir=0 <=> dir=NORTH [...etc] (cf node.h)
-            vector2i neighborPos = current;
+        for (int dir = 0; dir < 4; dir++) {
+            // Ne traiter que si la connexion existe réellement
+            if (!isNeighborConnected(lab, current, directions[dir])) continue;
 
-            if ( isNeighborConnected(lab, current, directions[dir]) ) {
-                neighborPos = vect2iAdd( neighborPos, getVectFromDir(directions[dir]) );
-            }
-            
-            //S'assurer qu'on est pas oob
-            if ((neighborPos.x >= 0 && neighborPos.x < labSize.x) && (neighborPos.y >= 0 && neighborPos.y < labSize.y)) {
+            vector2i neighborPos = vect2iAdd(current, getVectFromDir(directions[dir]));
 
-                if (!visited[neighborPos.y][neighborPos.x]) { 
+            if (neighborPos.x < 0 || neighborPos.x >= labSize.x ||
+                neighborPos.y < 0 || neighborPos.y >= labSize.y)
+                continue;
 
-                    visited[neighborPos.y][neighborPos.x] = 1; //si on a pas visité on visite
-                    queue[back] = neighborPos;
-                    distances[back] = currentDist + 1;
-                    back++;
-                } 
+            if (!visited[neighborPos.y][neighborPos.x]) {
+                visited[neighborPos.y][neighborPos.x] = 1;
+                // Garde contre dépassement du tableau
+                if (back >= max) {
+                    for (int i = 0; i < labSize.y; i++) free(visited[i]);
+                    free(visited); free(queue); free(distances);
+                    return -1;
+                }
+                queue[back] = neighborPos;
+                distances[back] = currentDist + 1;
+                back++;
             }
         }
     }
@@ -77,20 +81,16 @@ int shortestPathLength(t_node** lab, vector2i labSize, vector2i posDepart, vecto
 
 
 //fonction qui renvoie la position du prochain trésor qu'on doit atteindre.
-//direction = +1 -> sens croissant, direction=-1 -> sens decroissant
 //si problème ou prochain trésor inexistant, renvoie le vecteur {-1, -1}.
-vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize, int direction) {
-    int minimumTreasure = 9999; //+ petit trésor = prochain à visiter.
+vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize, t_player* player) {
+
     vector2i nextTreasurePos = newVect2i(-1, -1);
 
     for(int i=0; i<labSize.y; i++) {
         for(int j=0; j<labSize.x; j++) {
-            int treasureValue = labyrinth[i][j].treasureVal;
 
-            if (treasureValue > 0 && treasureValue < minimumTreasure) {
-                minimumTreasure = treasureValue;
-                //METTRE A JOUR LA POSITION DU PROCHAIN TRESOR
-                nextTreasurePos.y=i; nextTreasurePos.x = j;
+            if (labyrinth[i][j].treasureVal == player->nextTreasureVal) {
+                nextTreasurePos.y=i; nextTreasurePos.x=j;
             }
         }
     }
@@ -101,33 +101,91 @@ vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize, int direction)
 
 
 //ALGO PRINCIPAL DU PROGRAMME QUI RENVOIE NOTRE COUP A JOUER DE LA FORME:
-//1 5 1 1 2 qui valent dans l'ordre insertDirInt, insertIndx, nbRot, posToR.x, posToR.y
-char* calculateNextMove() {
+//1 5 1 1 2 qui valent dans l'ordre insertDirInt, insertIndx, nbRot, posToReach.x, posToReach.y
+char* calculateNextMove(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player) {
     
-    char result[50];
+    static char result[20];
+    int insertDirInt;
 
-    int insertDirInt; /*direction d'insertion (cf docu pdf)
-        •0 pour une insertion d’une ligne à gauche
-        •1 pour une insertion d’une ligne à droite
-        •2 pour une insertion d’une colonne en haut
-        •3 pour une insertion d’une colonne en bas
-    */
-    int insertIndex; //Indice de la ligne ou de la colonne où on insert la tuile
-    int nbRotations; //Nombre de rotation de la tuile avant de l’insérer (de 0 à 3 quart de tour dans le sens horaire)
-
-    vector2i posToReach; //position à atteindre après l'insertion de la tuile.
-
+    //TEMPORAIRE: on reste immobile.
+    vector2i posToReach=getBestPlayerPos(lab, labSize, player); //position qu'on veut joindre après l'insertion de la tuile.
     
+    if (areVectEq( posToReach, newVect2i(-1, -1) )) { //si vecteur erreur; rester immobile.
+        posToReach=player->pos;
+    }
+  
+    t_insertion bestInsertion = getBestInsertion(lab, labSize, extraTile, player);
 
+    switch (bestInsertion.insertDir) { //DETERMINER LA DIRECTION D'ENTREE
+        case WEST: insertDirInt = 0; break;
+        case EAST: insertDirInt = 1; break; 
+        case NORTH: insertDirInt = 2; break;
+        case SOUTH: insertDirInt = 3; break;
+    }
+
+    //écrire dans result: conversion de t_insertion vers string
+    sprintf(result, "%d %d %d %d %d",
+        insertDirInt,
+        bestInsertion.insertIndex,
+        bestInsertion.nbRotations,
+        posToReach.x,
+        posToReach.y
+    );
+
+    printf("MEILLEURE INSERTION TROUVEE: %s\nTRADUCTION: ", result);
+    printInsertion(bestInsertion);
+    return result;
+}
+
+
+
+//fonction qui déplace le joueur de 1 unité dans la direction dir en prenant en compte le fonctionnement de tore.
+void movePlayerOneTile(vector2i labSize, t_player* player, e_direction moveDir) {
+    int sizeX=labSize.x, sizeY=labSize.y;
+
+    switch(moveDir) {
+        case NORTH:
+            if (player->pos.y == sizeY-1) player->pos.y = 0; //si joueur en bas revenir en haut
+                    else player->pos.y+=1; //sinon on descend
+        break;
+
+        case SOUTH:
+            if (player->pos.y == 0) player->pos.y = sizeY-1; //si joueur en haut revenir en bas
+                    else player->pos.y-=1; //sinon on monte
+        break;
+
+        case EAST:
+            if (player->pos.x == 0) player->pos.x = sizeX-1; //si joueur à gauche revenir à droite
+                    else player->pos.x-=1; //sinon aller à gauche
+        break;
+
+        case WEST:
+            if (player->pos.x == sizeX-1) player->pos.x = 0; //si joueur à droite revenir à gauche
+                    else player->pos.x+=1; //sinon on va à droite
+        break;
+    } 
 }
 
 
 //fonction qui calcule la meilleure insertion à faire, et qui mets à jour les variables en param selon cette
 //insertion
-//TEMPORAIRE: donner l'insertion qui rapproche le plus du prochain trésor.
-void getBestInsertion(t_node** lab, vector2i labSize, t_insertion* insertion, int* nbRotations) {
+//TEMPORAIRE: toujours décaler au nord en 0 et sans rotation.
+//ATTENTION: on ne peut insérer que dans les rangs impairs mdrr
+t_insertion getBestInsertion(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player) {
+    int sizeX=labSize.x, sizeY=labSize.y, minDistToTreasure = 99999;
 
-    e_direction dir[4] = {NORTH, SOUTH, EAST, WEST};
-
-
+    return (t_insertion){.insertDir=NORTH, .insertIndex=1, .nbRotations=0};
 }
+
+
+
+
+
+//fct qui renvoie le vect2i de la meilleure position qu'on peut prendre (jouée après getBestInsertion)
+//TEMPORAIRE: immobile.
+vector2i getBestPlayerPos(t_node** lab, vector2i labSize, t_player* player) {
+
+
+    return player->pos;
+}
+

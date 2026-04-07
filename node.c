@@ -16,7 +16,7 @@ void rotateNode90CW(t_node* node) {
     
 }
 
-//fct qui renvoie 1 si la node lab[posY][posX] est connectée à la node qui se trouve à la direction dir
+//fct qui renvoie 1 si la node lab[posY][posX] est connectée à la node qui se trouve en +1 à la direction dir
 //renvoie 0 si non connecté
 int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir) {
     int posX=pos.x;
@@ -53,4 +53,15 @@ void printNode(t_node node) {
     node.WEST==IS_WALL,
     node.treasureVal
     );
+}
+
+void printInsertion(t_insertion inser) {
+    char dir;
+    switch(inser.insertDir) {
+        case NORTH: dir='N'; break;
+        case SOUTH: dir='S'; break;
+        case EAST: dir='E'; break;
+        case WEST: dir='W'; break;
+    }
+    printf("INSERTION EN: %c | INDX: %d | N° ROTA: %d\n", dir, inser.insertIndex, inser.nbRotations);
 }

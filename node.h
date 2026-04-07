@@ -28,6 +28,7 @@ typedef struct {
 
 } t_insertion;
 
+void printInsertion(t_insertion inser);
 
 void printNode(t_node node);
 void rotateNode90CW(t_node* node);

@@ -50,3 +50,19 @@ vector2i getVectFromDir(e_direction dir) {
     }
     return (vector2i){.x=0, .y=0};
 }
+
+void printVect2i(vector2i V) {
+    printf("{%d,%d}", V.x, V.y);
+}
+
+//fct qui renvoie la direction opposée à dir. sud -> nord, est -> ouest...
+//renvoie nord par défaut. jsp. J'avais envie.
+e_direction getOppositeDir(e_direction* dir) {
+    switch(*dir) {
+        case NORTH: return SOUTH; break;
+        case SOUTH: return NORTH; break;
+        case EAST: return WEST; break;
+        case WEST: return EAST; break;
+    }
+    return NORTH;
+}

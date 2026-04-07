@@ -34,7 +34,16 @@ void destroyLabyrinth(t_node** labyrinth, vector2i labSize) {
 }
 
 
+//copie le contenu du labyrinthe from dans le lab to. les 2 doivent avoir la même taille.
+void copyLabyrinth(t_node** from, t_node** to, vector2i labSize) {
+    int sizeX=labSize.x, sizeY=labSize.y;
 
+    for(int i=0; i<sizeY; i++) {
+        for(int j=0; j<sizeX; j++) {
+            to[i][j] = from[i][j];
+        }
+    }
+}
 
 //Renvoie l'extraTile, qui peut être replacée selon les règles de labyrinthe.
 //modifie la valeur de isOppStarting (cf getLabyrinth) et remplit extraTile
@@ -84,7 +93,9 @@ void fillLabyrinth(t_node** lab, vector2i labSize, int* isOpponentStarting, t_no
 
 //fct qui insère la tile extraTile dans le labyrinth du côté dirToInsert (NORTH=en haut, WEST=à gauche...)
 //pas besoin de modifier la valeur de extraTile, elle se trouve dans le msg
-void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, t_insertion insertion) {
+//ATTENTION: FAIT DISPARAITRE EXTRA TILE!
+//s'occupe aussi de déplacer le joueur / l'adversaire avec les tiles.
+void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, t_insertion insertion, t_player* player, t_player* opponent) {
     int sizeX = labSize.x, sizeY = labSize.y;
 
     e_direction dirToInsert = insertion.insertDir;
@@ -100,9 +111,14 @@ void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, t_insertion i
             for(int i=sizeY-1; i>0; i--) {
                 lab[i][insertIndex] = lab[i-1][insertIndex];
             }
-        
+            
+            if (insertIndex==player->pos.x) movePlayerOneTile(labSize, player, dirToInsert);
+            if (insertIndex==opponent->pos.x) movePlayerOneTile(labSize, opponent, dirToInsert);
+
             lab[0][insertIndex] = *extraTile;
         break;
+
+
 
         //|--- INSERER LA CASE EN BAS ---|
         case SOUTH:
@@ -110,35 +126,46 @@ void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, t_insertion i
                 lab[i][insertIndex] = lab[i+1][insertIndex];
             }
 
+            if (insertIndex==player->pos.x) movePlayerOneTile(labSize, player, dirToInsert);
+            if (insertIndex==opponent->pos.x) movePlayerOneTile(labSize, opponent, dirToInsert);
+
             lab[sizeY-1][insertIndex] = *extraTile;
         break;
+
+
 
         //|--- INSERER LA CASE A GAUCHE ---|
         case WEST:
             for(int j=sizeX-1; j>0; j--) {
                 lab[insertIndex][j] = lab[insertIndex][j-1];
             }
-        
+            
+            if (insertIndex==player->pos.y) movePlayerOneTile(labSize, player, dirToInsert);
+            if (insertIndex==opponent->pos.y) movePlayerOneTile(labSize, opponent, dirToInsert);
+
             lab[insertIndex][0] = *extraTile;
         break;
+
+
 
         //|--- INSERER LA CASE A DROITE ---|
         case EAST:
             for(int j=0; j<sizeX-1; j++) {
                 lab[insertIndex][j] = lab[insertIndex][j+1];
             }
-        
+            
+            if (insertIndex==player->pos.y) movePlayerOneTile(labSize, player, dirToInsert);
+            if (insertIndex==opponent->pos.y) movePlayerOneTile(labSize, opponent, dirToInsert);
 
             lab[insertIndex][sizeX-1] = *extraTile;
         break;
     }
-
 }
 
 
 
-void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char* moveString, char* msg, player* opponent) {
-    
+void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char* moveString, char* msg, t_player* player, t_player* opponent) {
+
     t_insertion insertion;
     vector2i posToReach; //position à atteindre après l'insertion de la tuile.
     
@@ -175,8 +202,7 @@ void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char
             &opponent->nextTreasureVal
             );
 
-    
-    insertTile(lab, labSize, extraTile, insertion); //INSERER LA TUILE
+    insertTile(lab, labSize, extraTile, insertion, player, opponent); //INSERER LA TUILE
     opponent->pos = posToReach; //déplacer l'adversaire où il doit aller.
 }
 
