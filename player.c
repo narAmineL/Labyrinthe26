@@ -102,10 +102,15 @@ vector2i getNextTreasurePos(t_node** labyrinth, vector2i labSize, t_player* play
 
 //ALGO PRINCIPAL DU PROGRAMME QUI RENVOIE NOTRE COUP A JOUER DE LA FORME:
 //1 5 1 1 2 qui valent dans l'ordre insertDirInt, insertIndx, nbRot, posToReach.x, posToReach.y
-char* calculateNextMove(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player) {
+char* calculateNextMove(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player, t_player* opponent) {
     
     static char result[20];
     int insertDirInt;
+
+    
+  
+    t_insertion bestInsertion = getBestInsertion(lab, labSize, extraTile, player);
+    insertTile(lab, labSize, *extraTile, bestInsertion, player, opponent);
 
     //TEMPORAIRE: on reste immobile.
     vector2i posToReach=getBestPlayerPos(lab, labSize, player); //position qu'on veut joindre après l'insertion de la tuile.
@@ -113,8 +118,6 @@ char* calculateNextMove(t_node** lab, vector2i labSize, t_node* extraTile, t_pla
     if (areVectEq( posToReach, newVect2i(-1, -1) )) { //si vecteur erreur; rester immobile.
         posToReach=player->pos;
     }
-  
-    t_insertion bestInsertion = getBestInsertion(lab, labSize, extraTile, player);
 
     switch (bestInsertion.insertDir) { //DETERMINER LA DIRECTION D'ENTREE
         case WEST: insertDirInt = 0; break;

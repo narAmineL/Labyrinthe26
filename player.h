@@ -21,7 +21,7 @@ typedef struct {
 
 int shortestPathLength(t_node** lab, vector2i labSize, vector2i posDepart, vector2i posArrivee);
 t_insertion getBestInsertion(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player);
-char* calculateNextMove(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player);
+char* calculateNextMove(t_node** lab, vector2i labSize, t_node* extraTile, t_player* player, t_player* opponent);
 void movePlayerOneTile(vector2i labSize, t_player* player, e_direction moveDir);
 vector2i getBestPlayerPos(t_node** lab, vector2i labSize, t_player* player);
 

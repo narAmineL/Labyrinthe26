@@ -10,7 +10,8 @@ void destroyLabyrinth(t_node** labyrinth, vector2i labSize);
 t_node** createLabyrinth(vector2i labSize);
 void copyLabyrinth(t_node** from, t_node** to, vector2i labSize);
 void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char* moveString, char* msg, t_player* player, t_player* opponent);
-void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, t_insertion insertion, t_player* player, t_player* opponent);
+void insertTile(t_node** lab, vector2i labSize, t_node extraTile, t_insertion insertion, t_player* player, t_player* opponent);
 void copyLabyrinth(t_node** from, t_node** to, vector2i labSize);
+void myPrintLabyrinth(t_node** lab, t_node extraTile, vector2i labSize, t_player* player, t_player* opponent);
 
 #endif

@@ -93,77 +93,84 @@ void fillLabyrinth(t_node** lab, vector2i labSize, int* isOpponentStarting, t_no
 
 //fct qui insère la tile extraTile dans le labyrinth du côté dirToInsert (NORTH=en haut, WEST=à gauche...)
 //pas besoin de modifier la valeur de extraTile, elle se trouve dans le msg
-//ATTENTION: FAIT DISPARAITRE EXTRA TILE!
+//ATTENTION: MODIFIE PAS EXTRA TILE
 //s'occupe aussi de déplacer le joueur / l'adversaire avec les tiles.
-void insertTile(t_node** lab, vector2i labSize, t_node* extraTile, t_insertion insertion, t_player* player, t_player* opponent) {
+void insertTile(t_node** lab, vector2i labSize, t_node extraTile, t_insertion insertion, t_player* player, t_player* opponent) {
     int sizeX = labSize.x, sizeY = labSize.y;
 
     e_direction dirToInsert = insertion.insertDir;
     int insertIndex = insertion.insertIndex;
 
+
     //effectuer les rotations de la tuile avant de la rentrer.
-    for(int i=0; i<insertion.nbRotations; i++) rotateNode90CW(extraTile);
+    extraTile = getRotatedNode90CW(insertion.nbRotations, extraTile);
 
     switch(dirToInsert) {
 
         //|--- INSERER LA CASE EN HAUT ---|
         case NORTH:
+
             for(int i=sizeY-1; i>0; i--) {
                 lab[i][insertIndex] = lab[i-1][insertIndex];
             }
             
-            if (insertIndex==player->pos.x) movePlayerOneTile(labSize, player, dirToInsert);
-            if (insertIndex==opponent->pos.x) movePlayerOneTile(labSize, opponent, dirToInsert);
+            if (insertIndex==player->pos.x) movePlayerOneTile(labSize, player, SOUTH);
+            if (insertIndex==opponent->pos.x) movePlayerOneTile(labSize, opponent, SOUTH);
 
-            lab[0][insertIndex] = *extraTile;
+            lab[0][insertIndex] = extraTile;
         break;
 
 
 
         //|--- INSERER LA CASE EN BAS ---|
         case SOUTH:
+
             for(int i=0; i<sizeY-1; i++) {
                 lab[i][insertIndex] = lab[i+1][insertIndex];
             }
 
-            if (insertIndex==player->pos.x) movePlayerOneTile(labSize, player, dirToInsert);
-            if (insertIndex==opponent->pos.x) movePlayerOneTile(labSize, opponent, dirToInsert);
+            if (insertIndex==player->pos.x) movePlayerOneTile(labSize, player, NORTH);
+            if (insertIndex==opponent->pos.x) movePlayerOneTile(labSize, opponent, NORTH);
 
-            lab[sizeY-1][insertIndex] = *extraTile;
+            lab[sizeY-1][insertIndex] = extraTile;
         break;
 
 
 
         //|--- INSERER LA CASE A GAUCHE ---|
         case WEST:
+
             for(int j=sizeX-1; j>0; j--) {
                 lab[insertIndex][j] = lab[insertIndex][j-1];
             }
             
-            if (insertIndex==player->pos.y) movePlayerOneTile(labSize, player, dirToInsert);
-            if (insertIndex==opponent->pos.y) movePlayerOneTile(labSize, opponent, dirToInsert);
+            if (insertIndex==player->pos.y) movePlayerOneTile(labSize, player, EAST);
+            if (insertIndex==opponent->pos.y) movePlayerOneTile(labSize, opponent, EAST);
 
-            lab[insertIndex][0] = *extraTile;
+            lab[insertIndex][0] = extraTile;
         break;
 
 
 
         //|--- INSERER LA CASE A DROITE ---|
         case EAST:
+
             for(int j=0; j<sizeX-1; j++) {
                 lab[insertIndex][j] = lab[insertIndex][j+1];
             }
             
-            if (insertIndex==player->pos.y) movePlayerOneTile(labSize, player, dirToInsert);
-            if (insertIndex==opponent->pos.y) movePlayerOneTile(labSize, opponent, dirToInsert);
+            if (insertIndex==player->pos.y) movePlayerOneTile(labSize, player, WEST);
+            if (insertIndex==opponent->pos.y) movePlayerOneTile(labSize, opponent, WEST);
 
-            lab[insertIndex][sizeX-1] = *extraTile;
+            lab[insertIndex][sizeX-1] = extraTile;
         break;
     }
 }
 
 
 
+
+//MODIFIE EXTRA TILE
 void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char* moveString, char* msg, t_player* player, t_player* opponent) {
 
     t_insertion insertion;
@@ -202,7 +209,74 @@ void computeOpponentMove(t_node** lab, vector2i labSize, t_node* extraTile, char
             &opponent->nextTreasureVal
             );
 
-    insertTile(lab, labSize, extraTile, insertion, player, opponent); //INSERER LA TUILE
+    printf("L'ADVERSAIRE A JOUE:");
+    printInsertion(insertion);
+    insertTile(lab, labSize, *extraTile, insertion, player, opponent); //INSERER LA TUILE
     opponent->pos = posToReach; //déplacer l'adversaire où il doit aller.
 }
 
+
+void myPrintLabyrinth(t_node** lab, t_node extraTile, vector2i labSize, t_player* player, t_player* opponent) {
+    
+    int sizeX = labSize.x, sizeY = labSize.y;
+
+    //CREER LA MATRICE D'AFFICHAGE
+    char** dispMatrix = malloc(sizeof(char*)* (sizeY*2+1) );
+    for(int i=0; i<sizeY*2+1; i++) dispMatrix[i] = malloc(sizeof(char) * (sizeX*3+1) );
+    
+    /* de la forme:
+
+    +--+--+--+
+    |13|  |  |
+    +--+--+--+
+    |  |01|  |
+    +--+--+--+
+    
+    */
+
+    //|---FAIRE LE QUADRILLAGE ---|
+    for(int i=0; i<sizeY*2+1; i++) {
+        for(int j=0; j<sizeX*3+1; j++) {
+            if (j%3==0 && i%2==0) dispMatrix[i][j]='+';
+            else dispMatrix[i][j]=' ';
+        }   
+    }
+
+    //|---ENTRER LES INFOS DES TUILES
+    for(int i=0; i<sizeY; i++) {
+        for(int j=0; j<sizeX; j++) {
+            if (lab[i][j].NORTH==IS_WALL) {
+                dispMatrix[i*2][j*3+1] = '-';
+                dispMatrix[i*2][j*3+2] = '-';
+            }
+            if (lab[i][j].SOUTH==IS_WALL) {
+                dispMatrix[i*2+2][j*3+1] = '-';
+                dispMatrix[i*2+2][j*3+2] = '-';
+            }
+            if (lab[i][j].EAST==IS_WALL) {
+                dispMatrix[i*2+1][j*3+3] = '|';
+            }
+            if (lab[i][j].WEST==IS_WALL) {
+                dispMatrix[i*2+1][j*3] = '|';
+            }
+
+            if (lab[i][j].treasureVal > 0) {
+                dispMatrix[i*2+1][j*3+1] = (char)('0' + lab[i][j].treasureVal/10);
+                dispMatrix[i*2+1][j*3+2] = (char)('0' + lab[i][j].treasureVal%10);
+            }
+        }
+    }
+
+
+
+    for(int i=0; i<sizeY*2+1; i++) {
+        for(int j=0; j<sizeX*3+1; j++) {
+            printf("%c", dispMatrix[i][j]);
+        }
+    printf("\n");
+    }
+
+    printf("EXTRA TILE:\n");
+    printNode(extraTile);
+
+}

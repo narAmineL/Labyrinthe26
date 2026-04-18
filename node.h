@@ -31,7 +31,7 @@ typedef struct {
 void printInsertion(t_insertion inser);
 
 void printNode(t_node node);
-void rotateNode90CW(t_node* node);
+t_node getRotatedNode90CW(int nbRotations, t_node node);
 int isNeighborConnected(t_node** labyrinth, vector2i pos, e_direction dir);
 
 #endif

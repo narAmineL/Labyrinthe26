@@ -6,13 +6,17 @@
 #include "node.h"
 
 
-//fct qui tourne une node de 90 degrés dans le sens horaire. (ClockWise)
-void rotateNode90CW(t_node* node) {
-    int tempNorth = node->NORTH;
-    node->NORTH = node->WEST;
-    node->WEST = node->SOUTH;
-    node->SOUTH = node->EAST;
-    node->EAST = tempNorth;
+//fct qui renvoie une copie de la node passée mais rotated de NbRotations fois 90 degrés dans le sens horaire. (ClockWise)
+t_node getRotatedNode90CW(int nbRotations, t_node node) {
+    for(int i=0; i<nbRotations; i++) {
+        int tempNorth = node.NORTH;
+        node.NORTH = node.WEST;
+        node.WEST = node.SOUTH;
+        node.SOUTH = node.EAST;
+        node.EAST = tempNorth;
+    }
+    
+    return node;
     
 }
 

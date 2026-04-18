@@ -20,6 +20,11 @@ int areVectEq(vector2i V1, vector2i V2) {
     else return 0;
 }
 
+//multiplication par un scalaire entier, ici a
+vector2i scalarMult(int a, vector2i V) {
+    return (vector2i){.x=V.x*a, .y=V.y*a};
+}
+
 //renvoie un vecteur résultant de l'addition de V1 et V2
 vector2i vect2iAdd(vector2i V1, vector2i V2) {
     return newVect2i(V1.x + V2.x, V1.y + V2.y);

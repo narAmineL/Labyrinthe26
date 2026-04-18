@@ -18,6 +18,8 @@ vector2i newVect2i(int x, int y);
 int areVectEq(vector2i V1, vector2i V2);
 vector2i getVectFromDir(e_direction dir);
 void printVect2i(vector2i V);
+e_direction getOppositeDir(e_direction* dir);
+vector2i scalarMult(int a, vector2i V);
 
 
 #endif
